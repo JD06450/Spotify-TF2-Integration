@@ -1,0 +1,11 @@
+# ignore binaries with no extension
+*
+!*.*
+!*/
+
+build/
+Simple-Web-Server/
+vcpkg_installed/
+.vscode/
+.env
+*.gch
