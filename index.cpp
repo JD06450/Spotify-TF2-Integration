@@ -8,15 +8,15 @@
 using namespace std;
 namespace api = spotify_api;
 
-using HttpServer   = SimpleWeb::Server<SimpleWeb::HTTP>;
+using HttpServer = SimpleWeb::Server<SimpleWeb::HTTP>;
 using HttpResponse = shared_ptr<HttpServer::Response>;
-using HttpRequest  = shared_ptr<HttpServer::Request>;
+using HttpRequest = shared_ptr<HttpServer::Request>;
 
 void parse_command(const string &command);
 
 string access_token;
 
-api::Api_Session * session;
+api::Api_Session *session;
 
 int main()
 {
@@ -30,10 +30,10 @@ int main()
 
     fs.open("../.env", fstream::in);
 
-
     for (int i = 0; i < env_vars; i++)
     {
-        if (fs.bad()) {
+        if (fs.bad())
+        {
             printf("File operation failed");
             return 1;
         }
@@ -41,18 +41,27 @@ int main()
 
         fs.getline(buffer_2, 50);
 
-        if (!strcmp(buffer, "CLIENT_ID")) {
-            if (regex_search(buffer_2, regex("[^A-Fa-f0-9]")) || strnlen(buffer_2, 50) > 32) {
+        if (!strcmp(buffer, "CLIENT_ID"))
+        {
+            if (regex_search(buffer_2, regex("[^A-Fa-f0-9]")) || strnlen(buffer_2, 50) > 32)
+            {
                 cout << "Environment variable invalid: " << buffer << endl;
                 return 1;
-            } else {
+            }
+            else
+            {
                 client_id.assign(buffer_2);
             }
-        } else if (!strcmp(buffer, "CLIENT_SECRET")) {
-            if (regex_search(buffer_2, regex("[^A-Fa-f0-9]")) || strnlen(buffer_2, 50) > 32) {
+        }
+        else if (!strcmp(buffer, "CLIENT_SECRET"))
+        {
+            if (regex_search(buffer_2, regex("[^A-Fa-f0-9]")) || strnlen(buffer_2, 50) > 32)
+            {
                 cout << "Environment variable invalid: " << buffer << endl;
                 return 1;
-            } else {
+            }
+            else
+            {
                 client_secret.assign(buffer_2);
             }
         }
@@ -61,7 +70,7 @@ int main()
     string auth_code;
     string auth_base64 = base64_encode(string(client_id + ':' + client_secret), false);
 
-    // Written using sample code 
+    // Written using sample code
 
     HttpServer server;
     server.config.port = 8080;
@@ -79,7 +88,8 @@ int main()
         {
             delimPos1 = content.find_first_of('=', i);
             delimPos2 = content.find_first_of('&', i);
-            if (!i && delimPos1 == string::npos) {
+            if (!i && delimPos1 == string::npos)
+            {
                 puts("Invalid query string");
                 return;
             }
@@ -88,7 +98,8 @@ int main()
             buffer2 = content.substr(delimPos1 + 1, delimPos2 - delimPos1);
             // cout << buffer1 << ": " << buffer2 << endl;
 
-            if (!strcmp(buffer1.c_str(), "code")) {
+            if (!strcmp(buffer1.c_str(), "code"))
+            {
                 auth_code = buffer2;
                 cout << "found code" << endl;
                 break;
@@ -99,28 +110,28 @@ int main()
         res->write("You can now close this window.");
     };
 
-    server.on_error = [](shared_ptr<HttpServer::Request> /*request*/, const SimpleWeb::error_code & /*ec*/) {
-    // Handle errors here
-    // Note that connection timeouts will also call this handle with ec set to SimpleWeb::errc::operation_canceled
-  };
+    server.on_error = [](shared_ptr<HttpServer::Request> /*request*/, const SimpleWeb::error_code & /*ec*/)
+    {
+        // Handle errors here
+        // Note that connection timeouts will also call this handle with ec set to SimpleWeb::errc::operation_canceled
+    };
 
     promise<unsigned short> server_port;
-    thread * server_thread = new thread([&server, &server_port]() {
-        server.start([&server_port](unsigned short port) {
-            server_port.set_value(port);
-        });
-    });
+    thread *server_thread = new thread([&server, &server_port]()
+                                       { server.start([&server_port](unsigned short port)
+                                                      { server_port.set_value(port); }); });
 
     cout << "Simple Web Server listening on port " << server_port.get_future().get() << endl;
 
     string query_string = "client_id=" + client_id +
-        "&response_type=code" +
-        "&redirect_uri=" + http::url_encode("http://localhost:8080") +
-        "&scope=" + http::url_encode("user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-modify-private playlist-read-private");
+                          "&response_type=code" +
+                          "&redirect_uri=" + http::url_encode("http://localhost:8080") +
+                          "&scope=" + http::url_encode("user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-modify-private playlist-read-private");
 
     system((string("firefox --window-size 640,480 --new-window \"accounts.spotify.com/authorize?") + query_string + '\"').c_str());
-    
-    while (auth_code == "") {
+
+    while (auth_code == "")
+    {
         sleep(1);
     }
     // Kill the webserver as it is no longer needed
@@ -131,15 +142,18 @@ int main()
 
     session = api::start_spotify_session(auth_code, "http://localhost:8080", auth_base64);
 
-    api::track * current_track = session->get_currently_playing_track();
+    api::track *current_track = session->get_currently_playing_track();
 
     printf("Currently Playing: %s by %s\nFrom album: %s\n", current_track->name.c_str(), current_track->artists[0]->name.c_str(), current_track->album->name.c_str());
 
-    api::album * song_album = session->get_album(current_track->album->id);
+    api::album *song_album = session->get_album(current_track->album->id);
 
-    if (song_album->album_type == "Single") {
+    if (song_album->album_type == "Single")
+    {
         puts("\n Album is a single");
-    } else {
+    }
+    else
+    {
         puts("\nSongs in current album:");
         for (auto track = song_album->tracks.items.begin(); track != song_album->tracks.items.end(); ++track)
         {
@@ -150,24 +164,35 @@ int main()
     log_main(parse_command);
 }
 
-void parse_command(const string &command) {
+void parse_command(const string &command)
+{
     string word;
-    if (command.find_first_of(' ') == string::npos) {
+    if (command.find_first_of(' ') == string::npos)
+    {
         word = command.substr(1);
-    } else {
+    }
+    else
+    {
         word = command.substr(1, command.find_first_of(' ') - 2);
     }
-    if (word == "start") {
-
-    } else if (word == "play") {
-
-    } else if (word == "add") {
-        
-    } else if (word == "skip") {
+    if (word == "start")
+    {
+    }
+    else if (word == "play")
+    {
+    }
+    else if (word == "add")
+    {
+    }
+    else if (word == "skip")
+    {
         session->skip_to_next(access_token);
-    } else if (word == "back") {
+    }
+    else if (word == "back")
+    {
         session->skip_to_previous(access_token);
-    } else if (word == "remove") {
-        
+    }
+    else if (word == "remove")
+    {
     }
 }

@@ -20,16 +20,19 @@ namespace json = nlohmann;
 
 namespace spotify_api
 {
-    struct follower_t {
+    struct follower_t
+    {
         std::string href;
         int total;
     };
-    struct image_t {
+    struct image_t
+    {
         std::string url;
         int width;
         int height;
     };
-    struct api_token_response {
+    struct api_token_response
+    {
         std::string access_token;
         std::string token_type;
         int expires_in;
@@ -39,7 +42,8 @@ namespace spotify_api
     struct album;
     struct artist;
     struct track;
-    struct album_tracks {
+    struct album_tracks
+    {
         string href;
         std::vector<track *> items;
         int limit;
@@ -67,7 +71,6 @@ namespace spotify_api
         std::vector<artist *> artists;
         album_tracks tracks;
     };
-    
 
     struct artist
     {
@@ -111,102 +114,109 @@ namespace spotify_api
     void object_from_json(const string &json_string, artist &output);
     void object_from_json(const string &json_string, track &output);
 
-    #define api_prefix "https://api.spotify.com/v1"
+#define api_prefix "https://api.spotify.com/v1"
 
-    class Api_Session {
-        private:
-            string access_token;
-            string refresh_token;
-            string base64_client_id_secret;
-            unsigned long int token_grant_time;
-            unsigned long int token_expiration_time;
+    class Api_Session
+    {
+    private:
+        string access_token;
+        string refresh_token;
+        string base64_client_id_secret;
+        unsigned long int token_grant_time;
+        unsigned long int token_expiration_time;
 
-        public:
-            Api_Session(api_token_response &token_obj);
-            Api_Session(string json_string);
+    public:
+        Api_Session(api_token_response &token_obj);
+        Api_Session(string json_string);
 
-            void refresh_access_token();
-            void set_base64_id_secret(string &new_value);
-            
-            // ALBUMS --------------------------------------------------------------------------------------------------------------------------------
+        void refresh_access_token();
+        void set_base64_id_secret(string &new_value);
 
-            album * get_album(const string &album_id);
-            std::vector<album> get_albums(const std::vector<string> &album_ids);
+        // ALBUMS --------------------------------------------------------------------------------------------------------------------------------
 
-            // PLAYER --------------------------------------------------------------------------------------------------------------------------------
+        album *get_album(const string &album_id);
+        std::vector<album> get_albums(const std::vector<string> &album_ids);
 
-            /*
-            * Usage: retrieves the user's current playback state
-            * Endpoint: /me/player
-            * Parameters: none
-            * Documentation: https://developer.spotify.com/documentation/web-api/reference/#/operations/get-information-about-the-users-current-playback
-            */
-            http::api_response inline get_playback_state(const std::string &access_token)
+        // PLAYER --------------------------------------------------------------------------------------------------------------------------------
+
+        /*
+         * Usage: retrieves the user's current playback state
+         * Endpoint: /me/player
+         * Parameters: none
+         * Documentation: https://developer.spotify.com/documentation/web-api/reference/#/operations/get-information-about-the-users-current-playback
+         */
+        http::api_response inline get_playback_state(const std::string &access_token)
+        {
+            return http::get(api_prefix "/me/player", std::string(""), access_token);
+        }
+
+        /*
+         * ***WIP***
+         * Usage: Transfers media playback to another device
+         * Endpoint: /me/player
+         * Parameters:
+         * --  device_ids: string array: An array containing the is of the device where playback should be transferred to
+         * --  play: boolean: If true, then playback is ensured on the new device, otherwise the old state is used
+         * Documentation: https://developer.spotify.com/documentation/web-api/reference/#/operations/transfer-a-users-playback
+         */
+        http::api_response inline transfer_playback(const std::string &access_token);
+
+        /*
+         * Usage: Get information on the user's available devices
+         * Endpoint: /me/player/devices
+         * Parameters: none
+         * Documentation: https://developer.spotify.com/documentation/web-api/reference/#/operations/get-a-users-available-devices
+         */
+        http::api_response inline get_available_devices(const std::string &access_token)
+        {
+            return http::get(api_prefix "/me/player/devices", std::string(""), access_token);
+        }
+
+        bool inline skip_to_previous(const string &access_token)
+        {
+            http::api_response response = http::post(api_prefix "/me/player/previous", string(""), access_token, true);
+            if (response.code == 204)
             {
-                return http::get(api_prefix "/me/player", std::string(""), access_token);
+                return true;
             }
-
-            /*
-            * ***WIP***
-            * Usage: Transfers media playback to another device
-            * Endpoint: /me/player
-            * Parameters:
-            * --  device_ids: string array: An array containing the is of the device where playback should be transferred to
-            * --  play: boolean: If true, then playback is ensured on the new device, otherwise the old state is used
-            * Documentation: https://developer.spotify.com/documentation/web-api/reference/#/operations/transfer-a-users-playback
-            */
-            http::api_response inline transfer_playback(const std::string &access_token);
-
-            /*
-            * Usage: Get information on the user's available devices
-            * Endpoint: /me/player/devices
-            * Parameters: none
-            * Documentation: https://developer.spotify.com/documentation/web-api/reference/#/operations/get-a-users-available-devices
-            */
-            http::api_response inline get_available_devices(const std::string &access_token)
+            else
             {
-                return http::get(api_prefix "/me/player/devices", std::string(""), access_token);
+                return false;
             }
+        }
 
-            
-            
-            bool inline skip_to_previous(const string &access_token) {
-                http::api_response response = http::post(api_prefix "/me/player/previous", string(""), access_token, true);
-                if (response.code == 204) {
-                    return true;
-                } else {
-                    return false;
-                }
+        bool inline skip_to_next(const string &access_token)
+        {
+            http::api_response response = http::post(api_prefix "/me/player/next", string(""), access_token, true);
+            if (response.code == 204)
+            {
+                return true;
             }
-
-            bool inline skip_to_next(const string &access_token) {
-                http::api_response response = http::post(api_prefix "/me/player/next", string(""), access_token, true);
-                if (response.code == 204) {
-                    return true;
-                } else {
-                    return false;
-                }
+            else
+            {
+                return false;
             }
+        }
 
-            // PLAYLISTS -----------------------------------------------------------------------------------------------------------------------------
+        // PLAYLISTS -----------------------------------------------------------------------------------------------------------------------------
 
-            void get_my_playlists();
+        void get_my_playlists();
 
-            // TRACKS --------------------------------------------------------------------------------------------------------------------------------
+        // TRACKS --------------------------------------------------------------------------------------------------------------------------------
 
-            /*
-            * Usage: Get the track the the user is currently playing
-            * Endpoint: /me/player/currently-playing
-            * Parameters: none
-            * Documentation: https://developer.spotify.com/documentation/web-api/reference/#/operations/get-the-users-currently-playing-track
-            */
-            track * get_currently_playing_track();
-            track * search_for_track(const string &search_query);
+        /*
+         * Usage: Get the track the the user is currently playing
+         * Endpoint: /me/player/currently-playing
+         * Parameters: none
+         * Documentation: https://developer.spotify.com/documentation/web-api/reference/#/operations/get-the-users-currently-playing-track
+         */
+        track *get_currently_playing_track();
+        track *search_for_track(const string &search_query);
     };
 
     // Authentication Process Step 2
     // Using the authentication code retrieved from the Spotify Web API, we send another request to generate an access token.
-    Api_Session * start_spotify_session(std::string &auth_code, const std::string &redirect_uri, std::string &client_keys_base64);
+    Api_Session *start_spotify_session(std::string &auth_code, const std::string &redirect_uri, std::string &client_keys_base64);
 } // namespace spotify_api
 
 #endif
