@@ -4,6 +4,7 @@
 !*/
 
 build/
+Cpp-Spotify-API/
 Simple-Web-Server/
 vcpkg_installed/
 .vscode/

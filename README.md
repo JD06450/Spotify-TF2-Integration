@@ -1,3 +1,3 @@
 # Spotify & Team Fortress 2 Integration
 
-This is a simple C++ program that allows you to use Team Fortress 2 chat commands to control your Spotify player while in-game. This is not my idea. The original code and idea for this project comes from Steam user [Myface28](https://steamcommunity.com/profiles/76561198798513165). The original code was written in C#, but I have taken on the challenge of rewriting it in C++ without using the original source code.
+This is a C++ program that allows you to use Team Fortress 2 chat commands to control your Spotify player while in-game.

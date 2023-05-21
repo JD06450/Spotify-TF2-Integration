@@ -1,7 +1,0 @@
-{
-    "name": "spotify-tf2-integration",
-    "version-string": "0.1.0",
-    "dependencies": [
-        "nlohmann-json"
-    ]
-}

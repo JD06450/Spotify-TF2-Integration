@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.23.0)
 project(Spotify VERSION 0.1.0)
 
-include(CTest)
-enable_testing()
+# Specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(CURL REQUIRED)
-add_executable(Spotify index.cpp base64.cpp curl-util.cpp spotify-api/spotify-api.cpp)
-
-target_link_libraries(Spotify PRIVATE nlohmann_json::nlohmann_json PRIVATE CURL::libcurl)
+add_executable(Spotify
+	index.cpp
+	base64.cpp
+	tf2-logfile.cpp
+)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
