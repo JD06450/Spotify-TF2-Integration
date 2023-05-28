@@ -49,8 +49,8 @@ void log_main(Func callback)
 				}
 			}
 		}
-		sleep(1);
 		logfile.close();
+		sleep(1);
 	}
 	logfile.close();
 }
