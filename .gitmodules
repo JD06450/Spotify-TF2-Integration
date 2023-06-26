@@ -7,3 +7,6 @@
 [submodule "vcpkg"]
 	path = vcpkg
 	url = https://github.com/microsoft/vcpkg
+[submodule "Cpp-RCON"]
+	path = Cpp-RCON
+	url = https://github.com/JD06450/Cpp-RCON.git

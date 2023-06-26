@@ -11,20 +11,18 @@ set(CMAKE_TOOLCHAIN_FILE ${VCPKG_INSTALLATION_DIR}/scripts/buildsystems/vcpkg.cm
 project(Spotify VERSION 0.1.0)
 
 add_subdirectory(Cpp-Spotify-API)
+add_subdirectory(Cpp-RCON)
 
 add_executable(Spotify
 	index.cpp
 	base64.cpp
 )
 
-# add_dependencies(Spotify Cpp-Spotify-API)
-
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(CURL CONFIG REQUIRED)
 
-target_include_directories(Spotify PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Cpp-Spotify-API)
-# target_link_directories(Spotify PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Cpp-Spotify-API)
-target_link_libraries(Spotify PRIVATE Cpp-Spotify-API nlohmann_json::nlohmann_json CURL::libcurl)
+target_include_directories(Spotify PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Cpp-Spotify-API ${CMAKE_CURRENT_SOURCE_DIR}/Cpp-RCON/include)
+target_link_libraries(Spotify PRIVATE Cpp-Spotify-API Lib-Cpp-RCON nlohmann_json::nlohmann_json CURL::libcurl)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
